@@ -1,8 +1,7 @@
 """Implementation des DRESS-Algorithmus"""
 
-import helper_functions
 import math
-
+from Base.helper_functions import *
 
 """
 qcons ranked supspaces
