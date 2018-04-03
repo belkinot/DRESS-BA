@@ -1,7 +1,7 @@
 """Implementation des DRESS-Algorithmus"""
 
 import math
-from Base.helper_functions import *
+from Base.helper_functions import distance_heom
 
 """
 qcons ranked supspaces
@@ -60,7 +60,7 @@ def subspace_quality_scoring(dataset):
 
 
 def clustering_dress(dataset):
-    minPts=round(math.log1p(len(dataset)))
+    minPts = round(math.log1p(len(dataset)))
     epsilon = 1
     #Distance of every point in our subspace to its m'th nearest neighbour and sort this list in ascending order
     #create an m-dist graph ?????? Nachfragen!!!

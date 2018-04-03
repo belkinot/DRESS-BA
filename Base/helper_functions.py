@@ -28,12 +28,12 @@ def distance_heom(erster, zweiter):
     return distance
 
 
-"""TODO: Evaluierungsmetriken Sensitivity, specificity, accuracy, AUC, F-Measure"""
 
 def k_nearest_neighbour_list(dataset, parameter_k):
-    """Gibt eine Liste mit den Distanzen des k-ten Nachbars von jedem Punkt aus , Index der Liste bezeichnet den Punkt im Datensatz"""
+    """Gibt eine Liste mit den Distanzen des k-ten Nachbars von jedem Punkt aus.
+    Index der Liste bezeichnet den Punkt im Datensatz"""
     neighbours = list()
-    for count, value in enumerate(dataset):
+    for _, value in enumerate(dataset):
         mydist = [[euclidean_distance(value, value2), count2] for count2, value2 in enumerate(dataset)]
         mydist.sort()
         neighbours.append([x[1] for x in mydist[parameter_k]])
@@ -43,3 +43,5 @@ def k_nearest_neighbour_list(dataset, parameter_k):
 def euclidean_distance(point_one, point_two):
     """Berechnet die euklidische Distanz von zwei Punkten"""
     return math.sqrt(pow((point_one - point_two), 2))
+
+#TODO: Evaluierungsmetriken Sensitivity, specificity, accuracy, AUC, F-Measure"""
