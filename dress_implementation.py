@@ -16,7 +16,20 @@ Cleaning - candidate subspaces
 """
 Pseudocode
 Start subspace mit Mächtigkeit 1 (1 Element?) C_all enthält alle features
+berechne q(S) = q_const(S) * q_dist(S) 
+Choose S_best von C_all --> q(S_best) = q_best
+Vereinige S_best mit jedem Subspace von C_all --> neue Candidatsubspaces C_i
+Vereinfachung: 
+S_dist = S_best wenn q_dist(S_best) >= q_dist(S*), sonst S*
+S_new nur wenn d_nl_avg(S_dist) - d_nl_avg(S_new) und
+               d_ml_avg(S_dist) - d_nl_avg(S_new)
 
+Clustere jeden Subspace mit DBSCAN
+Errechne q(S) 
+Subspace bleibt erhalten, wenn q(S) > q_best (q(S_best))
+C_all vereinigt mit C_i am ende der Iteration i
+
+S* und S_best werden von C_all entfernt, neue Iteration beginnt
 
 
 """
@@ -68,7 +81,7 @@ def subspace_quality_scoring(dataset):
 
 def clustering_dress(dataset):
     minPts = round(math.log1p(len(dataset)))
-    epsilon = 1
+    #epsilon
     #Distance of every point in our subspace to its m'th nearest neighbour and sort this list in ascending order
     #create an m-dist graph ?????? Nachfragen!!!
 
