@@ -4,15 +4,22 @@ import math
 from Base.helper_functions import distance_heom
 
 """
-qcons ranked supspaces
-qdist using HEOS
+ML constraints low distance
+NL constraints have high distance to each other - search for subspaces
 
-q(s)
-
-dbscan auf subspace
-
+Dress generiert potential candidate subspaces (select best subspace)
+Add Features to the subspace - Candidate Subspaces(merging step)
+Filtering - dann errechne quality scores durch clustering
+Cleaning - candidate subspaces
 """
 
+"""
+Pseudocode
+Start subspace mit Mächtigkeit 1 (1 Element?) C_all enthält alle features
+
+
+
+"""
 
 
 def merge_and_filter_subspaces(dataset, originalFeatureSet):
