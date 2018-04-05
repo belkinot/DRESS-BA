@@ -15,7 +15,7 @@ Cleaning - candidate subspaces
 
 """
 Pseudocode
-Start subspace mit Mächtigkeit 1 (1 Element?) C_all enthält alle features
+Start subspace mit Mächtigkeit 1 (1 Feature) C_all enthält alle features
 berechne q(S) = q_const(S) * q_dist(S) 
 Choose S_best von C_all --> q(S_best) = q_best
 Vereinige S_best mit jedem Subspace von C_all --> neue Candidatsubspaces C_i
@@ -47,36 +47,62 @@ def merge_and_filter_subspaces(dataset, originalFeatureSet):
         # store subspace candidate
         # store subspace quality
 
-def subspace_quality_scoring(dataset):
-    #Liste mit Featuren, letzter Eintrag beinhaltet Clusterlabel
-    # ml-satisfied ML constraint set
-    ml_sat_set = list()
-    nl_sat_set = list()
+def subspace_quality_scoring(dataset_with_n_features, clustering, ml_constraints, nl_constraints):
+    """Scores Quality of our Subspace"""
+    # ml-constraints (Tupel von Indizes die verbunden sein müssen)
 
-    ml = list()
-    nl = list()
 
-    q_cons = len(ml_sat_set) + len(nl_sat_set) / (len(ml) + len(nl))
+    #Prüfe ob ml constraints in einem Cluster sind
+    ml_sat = check_ml_constraints_in_clustering(ml_constraints, clustering)
+    #Prüfe ob nl_constraints in verschiedenen Clustern sind
+    nl_sat = check_nl_constraints_in_clustering(nl_constraints, clustering)
+
+    q_cons = len(ml_sat) + len(nl_sat) / (len(ml_constraints) + len(nl_constraints))
 
     d_nl_avg = 0
     d_ml_avg = 0
 
-    for count, _ in enumerate(nl_sat_set):
-        for count2, _ in enumerate(nl_sat_set):
-            d_nl_avg += distance_heom(nl_sat_set[count], nl_sat_set[count2])
-    d_nl_avg = d_nl_avg/len(nl_sat_set) # Average Distanz des Satisfaction Sets oder des gesamten NL sets??
+    for _, value in enumerate(nl_constraints):
+        d_nl_avg += distance_heom(dataset_with_n_features[value[0]], dataset_with_n_features[value[1]])
+    d_nl_avg = d_nl_avg/len(nl_constraints) # Average Distanz des gesamten NL sets??
 
-    for count, _ in enumerate(ml_sat_set):
-        for count2, _ in enumerate(ml_sat_set):
-            d_ml_avg += distance_heom(ml_sat_set[count], ml_sat_set[count2])
-    d_ml_avg = d_ml_avg/len(ml_sat_set)
-
+    for _, value in enumerate(ml_constraints):
+        d_ml_avg += distance_heom(dataset_with_n_features[value[0]], dataset_with_n_features[value[1]])
+    d_ml_avg = d_ml_avg/len(ml_constraints)
 
     q_dist = d_nl_avg - d_ml_avg
-
+    #Errechne Qualität
     quality = q_cons * q_dist
 
     return quality
+
+def check_nl_constraints_in_clustering(constraints, clustering):
+    """Prüft wie viele NL-Constraints erfüllt sind"""
+    #Annahme: Clustering ist eine Liste von Listen mit Indizes ((1,2,5), (3,4), (6,9), (7,8))
+    constraint_sat = 0
+
+    for _, constraint in enumerate(constraints):
+        for _, value in enumerate(clustering):
+            if constraint[0] in value:
+                if constraint[1] not in value:
+                    constraint_sat += 1
+
+    return constraint_sat
+
+
+
+def check_ml_constraints_in_clustering(constraints, clustering):
+    """Prüft wie viele ML-Constraints erfüllt sind"""
+    #Annahme: Clustering ist eine Liste von Listen mit Indizes ((1,2,5), (3,4), (6,9), (7,8))
+    constraint_sat = 0
+
+    for _, constraint in enumerate(constraints):
+        for _, value in enumerate(clustering):
+            if constraint[0] in value:
+                if constraint[1] in value:
+                    constraint_sat += 1
+
+    return constraint_sat
 
 
 def clustering_dress(dataset):
@@ -87,8 +113,43 @@ def clustering_dress(dataset):
 
 
 
-def subspace_processing_and_cluster_generation(dataset, setOfSubspaceClusters, setOfCandidateSubspaces,setOfSubspaceQualityValues):
+def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_constraints):
     """erstellt die Subspaces und die Cluster"""
+    current_dataset = list()
+    q_best = 0
+    features_of_subspaces = list(range(len(dataset)))
+    #erstelle 1-Dimensionalen Datensatz
+    for i in features_of_subspaces:
+        for _, value in enumerate(dataset):
+            current_dataset.append(value[i])
+
+        #Cluster DBSCAN
+        #Berechne q(s) und speichere diesen Wert
+        q_s = subspace_quality_scoring(current_dataset,ml_constraints=ml_constraints, nl_constraints=nl_constraints)
+        if q_s > q_best:
+            q_best = q_s
+            best_subspace = features_of_subspaces[i]
+        #Vergleiche alle q(s) und wähle q_best(S)
+
+    #merge mit bestem subspace:
+    features_of_candidate_subspaces = list(len(features_of_subspaces))
+    #entferne besten Subspace aus der Liste C_all
+    features_of_subspaces.remove(best_subspace)
+    merge_candidate = best_subspace
+
+    #Hier soll nur eine Liste von Featuren erstellt werden (2 Dimensionen, n-Dimensionen - aus denen dann der Datensatz generiert wird)
+    if len(features_of_candidate_subspaces[0]) < 2:
+        for idx in features_of_subspaces:
+            features_of_candidate_subspaces[idx] = [best_subspace, features_of_candidate_subspaces[idx]]
+    else:
+        for idx, _ in features_of_subspaces:
+            features_of_subspaces.append(best_subspace)
+    #Cluster DBSCAN mit neuem current dataset
+
+    # Clustere zweidimensionale Räume, berechne q(s) sofort --> if q(s)>q_best, dann breche hier ab und vereinige Feature von q(s) mit allen anderen FEatures (3-Dimensionen nun)
+    # tue dies so lange bis kein besseres q_s gefunden wurde ODER alle Features genutzt werden
+
+
     """startet mit subspaces der größe 1
      setOfCandidateSubspaces hat alle Features (Dimensionen)
      Iteration 2 (Subspace der Größe 2) für jeden Supspace in C_i (Candidate)
@@ -116,13 +177,9 @@ def subspace_processing_and_cluster_generation(dataset, setOfSubspaceClusters, s
     Iteration stoppt wenn C_all leer ist
     
     """
+    return best_subspace
 
-    return setOfSubspaceClusters
 
 
-def calculate_subspace_quality():
-    """Berechnet die Subspace Qualität"""
-    subspace_quality = 0
-    return subspace_quality
 
 

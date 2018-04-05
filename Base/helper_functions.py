@@ -82,10 +82,10 @@ def euclidean_distance(point_one, point_two):
     """Berechnet die euklidische Distanz von zwei Punkten"""
     return math.sqrt(pow((point_one - point_two), 2))
 
+#TODO: Epsilonberechnung für DBSCAN - KneePoint gedönse
 #TODO: Evaluierungsmetriken Sensitivity, specificity, accuracy, AUC, F-Measure"""
 
 
 def eval_sensitivity(clustering):
     """Sensitivity"""
     return 0
-
