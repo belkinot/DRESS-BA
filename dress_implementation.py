@@ -1,7 +1,7 @@
 """Implementation des DRESS-Algorithmus"""
 
 import math
-from Base.helper_functions import distance_heom
+from Base.helper_functions import distance_heom, k_nearest_neighbour_list, draw_k_dist_line
 from sklearn.cluster import DBSCAN
 
 """
@@ -110,14 +110,13 @@ def check_ml_constraints_in_clustering(constraints, clustering):
 def clustering_dress(dataset):
     minPts = round(math.log1p(len(dataset)))
 
-    
-    epsilon
+    epsilon = draw_k_dist_line(k_nearest_neighbour_list(dataset, minPts))
     #Distance of every point in our subspace to its m'th nearest neighbour and sort this list in ascending order
     #create an m-dist graph ?????? Nachfragen!!!
 
-    DBSCAN(epsilon,minPts)
+    dataset.DBSCAN(epsilon,minPts)
 
-
+    return 0
 
 def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_constraints):
     """erstellt die Subspaces und die Cluster"""
@@ -147,7 +146,7 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
         candidate_i.append(help)
 
     #Cluster DBSCAN mit neuem current dataset
-    #TODO: Erstelle m-Dimensionalen Datensatz aus n-Dimensionalem (oder merke dir nur die genutzten Dimensionen im richtigen Datenformat)
+    #TODO: Erstelle m-Dimensionalen Datensatz aus n-Dimensionalem (oder merke dir nur die genutzten Dimensionen im richtigen Datenformat) wobei m < n
     # Clustere zweidimensionale Räume, berechne q(s) sofort --> if q(s)>q_best, dann breche hier ab und vereinige Feature von q(s) mit allen anderen FEatures (3-Dimensionen nun)
     # tue dies so lange bis kein besseres q_s gefunden wurde ODER alle Features genutzt werden
 
