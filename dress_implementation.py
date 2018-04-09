@@ -2,6 +2,7 @@
 
 import math
 from Base.helper_functions import distance_heom
+from sklearn.cluster import DBSCAN
 
 """
 ML constraints low distance
@@ -108,9 +109,13 @@ def check_ml_constraints_in_clustering(constraints, clustering):
 
 def clustering_dress(dataset):
     minPts = round(math.log1p(len(dataset)))
-    #epsilon
+
+    
+    epsilon
     #Distance of every point in our subspace to its m'th nearest neighbour and sort this list in ascending order
     #create an m-dist graph ?????? Nachfragen!!!
+
+    DBSCAN(epsilon,minPts)
 
 
 

@@ -71,18 +71,39 @@ def k_nearest_neighbour_list(dataset, parameter_k):
     """Gibt eine Liste mit den Distanzen des k-ten Nachbars von jedem Punkt aus.
     Index der Liste bezeichnet den Punkt im Datensatz"""
     neighbours = list()
+    neighbours_distances = list()
     for _, value in enumerate(dataset):
         mydist = [[euclidean_distance(value, value2), count2] for count2, value2 in enumerate(dataset)]
         mydist.sort()
         neighbours.append([x[1] for x in mydist[parameter_k]])
+        # ab hier Erweiterung um k-Dist-Graph erstellung zu ermöglichen
+        # neighbours_distances.append([y[0] for y in mydist[parameter_k]])
+        neighbours = list(zip(neighbours_distances, neighbours))
+        #sortiere Reverse um den K-Dist-Graph zu erstellen
+        neighbours.sort(reverse=True)
     return neighbours
+
+def draw_k_dist_line(list_of_elements):
+
+    point_b = list_of_elements[0][0]
+    point_a = list_of_elements[len(list_of_elements)[0]]
+    # y = m*x+b
+    m = (point_a-point_b)/len(list_of_elements)
+
+    knee_point = list()
+    for idx, in enumerate(list_of_elements):
+        point_one = (idx, list_of_elements[idx])
+        point_two = (idx, m*list_of_elements[idx]+point_b)
+        knee_point += euclidean_distance(point_one, point_two)
+    knee_point.sort()
+    epsilon = knee_point[0]
+    return epsilon
 
 
 def euclidean_distance(point_one, point_two):
     """Berechnet die euklidische Distanz von zwei Punkten"""
     return math.sqrt(pow((point_one - point_two), 2))
 
-#TODO: Epsilonberechnung für DBSCAN - KneePoint gedönse
 #TODO: Evaluierungsmetriken Sensitivity, specificity, accuracy, AUC, F-Measure"""
 
 
