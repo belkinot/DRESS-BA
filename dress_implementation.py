@@ -37,7 +37,7 @@ S* und S_best werden von C_all entfernt, neue Iteration beginnt
 
 
 def merge_and_filter_subspaces(dataset, originalFeatureSet):
-
+    """test"""
     subspaceClusters = set()
     candidateSubspaces = set()
     subspaceQualityValues = set()
@@ -47,6 +47,8 @@ def merge_and_filter_subspaces(dataset, originalFeatureSet):
         # store initial clusters
         # store subspace candidate
         # store subspace quality
+
+    return subspaceClusters
 
 def subspace_quality_scoring(dataset_with_n_features, clustering, ml_constraints, nl_constraints):
     """Scores Quality of our Subspace"""
@@ -108,13 +110,14 @@ def check_ml_constraints_in_clustering(constraints, clustering):
 
 
 def clustering_dress(dataset):
-    minPts = round(math.log1p(len(dataset)))
+    """Dress algorithmus"""
+    minpts = round(math.log1p(len(dataset)))
 
-    epsilon = draw_k_dist_line(k_nearest_neighbour_list(dataset, minPts))
+    epsilon = draw_k_dist_line(k_nearest_neighbour_list(dataset, minpts))
     #Distance of every point in our subspace to its m'th nearest neighbour and sort this list in ascending order
     #create an m-dist graph ?????? Nachfragen!!!
 
-    dataset.DBSCAN(epsilon,minPts)
+    dataset.DBSCAN(epsilon, minpts)
 
     return 0
 
@@ -130,8 +133,9 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
             current_dataset.append(value[i])
 
         #Cluster DBSCAN
+        clustering = DBSCAN()
         #Berechne q(s) und speichere diesen Wert
-        q_s = subspace_quality_scoring(current_dataset,ml_constraints=ml_constraints, nl_constraints=nl_constraints)
+        q_s = subspace_quality_scoring(current_dataset, clustering, ml_constraints=ml_constraints, nl_constraints=nl_constraints)
         if q_s > q_best:
             q_best = q_s
             best_subspace = candidate_all[i]
@@ -142,8 +146,8 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
     #merge mit bestem subspace:
     candidate_i = list()
     for _, value2 in enumerate(candidate_all):
-        help = (best_subspace, value2)  #Problem von Listen in Listen - wie kann man dies umgehen?
-        candidate_i.append(help)
+        helplist = (best_subspace, value2)  #Problem von Listen in Listen - wie kann man dies umgehen?
+        candidate_i.append(helplist)
 
     #Cluster DBSCAN mit neuem current dataset
     #TODO: Erstelle m-Dimensionalen Datensatz aus n-Dimensionalem (oder merke dir nur die genutzten Dimensionen im richtigen Datenformat) wobei m < n
@@ -174,9 +178,7 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
     Setze C_all = C_all Vereinigt mit C_i am ende von Iteration i
     
     Für jeden Subspace S_best vereinigt S* in C_i wird S* von C_all entfernt und dann S_best von C_all
-    
     Iteration stoppt wenn C_all leer ist
-    
     """
     return best_subspace
 

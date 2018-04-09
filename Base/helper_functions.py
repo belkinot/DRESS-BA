@@ -84,16 +84,16 @@ def k_nearest_neighbour_list(dataset, parameter_k):
     return neighbours
 
 def draw_k_dist_line(list_of_elements):
-
+    """Berechnet den Epsilon Parameter mithilfe der knee_point Methode"""
     point_b = list_of_elements[0][0]
     point_a = list_of_elements[len(list_of_elements)[0]]
     # y = m*x+b
-    m = (point_a-point_b)/len(list_of_elements)
+    steigung = (point_a-point_b)/len(list_of_elements)
 
     knee_point = list()
     for idx, in enumerate(list_of_elements):
         point_one = (idx, list_of_elements[idx])
-        point_two = (idx, m*list_of_elements[idx]+point_b)
+        point_two = (idx, steigung*list_of_elements[idx]+point_b)
         knee_point += euclidean_distance(point_one, point_two)
     knee_point.sort()
     epsilon = knee_point[0]
