@@ -63,8 +63,9 @@ def subspace_quality_scoring(dataset_with_n_features, clustering, ml_constraints
     d_ml_avg = 0
 
     for _, value in enumerate(nl_constraints):
+        # Indizes 0 und 1 für das korrekte Ansprechen der Tupelpaare
         d_nl_avg += distance_heom(dataset_with_n_features[value[0]], dataset_with_n_features[value[1]])
-    d_nl_avg = d_nl_avg/len(nl_constraints) # Average Distanz des gesamten NL sets??
+    d_nl_avg = d_nl_avg/len(nl_constraints)# Average Distanz des gesamten NL sets??
 
     for _, value in enumerate(ml_constraints):
         d_ml_avg += distance_heom(dataset_with_n_features[value[0]], dataset_with_n_features[value[1]])
@@ -117,9 +118,10 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
     """erstellt die Subspaces und die Cluster"""
     current_dataset = list()
     q_best = 0
-    features_of_subspaces = list(range(len(dataset)))
+    candidate_all = list(range(len(dataset[0])))#Anzahl der Dimensionen
+
     #erstelle 1-Dimensionalen Datensatz
-    for i in features_of_subspaces:
+    for i in candidate_all:
         for _, value in enumerate(dataset):
             current_dataset.append(value[i])
 
@@ -128,24 +130,19 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
         q_s = subspace_quality_scoring(current_dataset,ml_constraints=ml_constraints, nl_constraints=nl_constraints)
         if q_s > q_best:
             q_best = q_s
-            best_subspace = features_of_subspaces[i]
+            best_subspace = candidate_all[i]
         #Vergleiche alle q(s) und wähle q_best(S)
 
+    # entferne besten Subspace aus der Liste C_all
+    candidate_all.remove(best_subspace)
     #merge mit bestem subspace:
-    features_of_candidate_subspaces = list(len(features_of_subspaces))
-    #entferne besten Subspace aus der Liste C_all
-    features_of_subspaces.remove(best_subspace)
-    merge_candidate = best_subspace
+    candidate_i = list()
+    for _, value2 in enumerate(candidate_all):
+        help = (best_subspace, value2)  #Problem von Listen in Listen - wie kann man dies umgehen?
+        candidate_i.append(help)
 
-    #Hier soll nur eine Liste von Featuren erstellt werden (2 Dimensionen, n-Dimensionen - aus denen dann der Datensatz generiert wird)
-    if len(features_of_candidate_subspaces[0]) < 2:
-        for idx in features_of_subspaces:
-            features_of_candidate_subspaces[idx] = [best_subspace, features_of_candidate_subspaces[idx]]
-    else:
-        for idx, _ in features_of_subspaces:
-            features_of_subspaces.append(best_subspace)
     #Cluster DBSCAN mit neuem current dataset
-
+    #TODO: Erstelle m-Dimensionalen Datensatz aus n-Dimensionalem (oder merke dir nur die genutzten Dimensionen im richtigen Datenformat)
     # Clustere zweidimensionale Räume, berechne q(s) sofort --> if q(s)>q_best, dann breche hier ab und vereinige Feature von q(s) mit allen anderen FEatures (3-Dimensionen nun)
     # tue dies so lange bis kein besseres q_s gefunden wurde ODER alle Features genutzt werden
 
@@ -178,8 +175,6 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
     
     """
     return best_subspace
-
-
 
 
 
