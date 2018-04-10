@@ -3,29 +3,29 @@ import numbers
 import math
 
 
-
 def normalize_features(dataset):
     """normalisiere alle Features
         Bedenke letzten Eintrag im Dataset - Clusterzugehörigkeit? ML Constraint?"""
 
     normalized_dataset = dataset
-    #for i in range(len(dataset[0])):
-     #   max_value = max(dataset, key=lambda x: x[i])
+    # for i in range(len(dataset[0])):
+     # max_value = max(dataset, key=lambda x: x[i])
     max_value = list(dataset[0])
-    #performanteres Maximum finden?
+    # performanteres Maximum finden?
     for count, value in enumerate(dataset):
         for count2, value2 in enumerate(value):
-            #Sicherstellen, dass es Zahlenwerte sind
+            # Sicherstellen, dass es Zahlenwerte sind
             if isinstance(max_value[count2], numbers.Number) and max_value[count2] <= value2:
-                #get my maximum value
+                # get my maximum value
                 max_value[count2] = value2
 
     for count, value in enumerate(dataset):
         for count2, _ in enumerate(value):
-            #erneut sicherstellen, dass es Zahlenwerte sind
+            # erneut sicherstellen, dass es Zahlenwerte sind
             if isinstance(max_value[count2], numbers.Number):
                 normalized_dataset[count][count2] = dataset[count][count2]/max_value[count2]
     return normalized_dataset
+
 
 def normalize_features_numpy(dataset):
     """normalisiere alle Features
@@ -35,7 +35,7 @@ def normalize_features_numpy(dataset):
     max_value = dataset.max(0) #Krasse Numpy-Array Magic
     for count, value in enumerate(dataset):
         for count2, _ in enumerate(value):
-            #erneut sicherstellen, dass es Zahlenwerte sind
+            # erneut sicherstellen, dass es Zahlenwerte sind
             if isinstance(max_value[count2], numbers.Number):
                 normalized_dataset[count][count2] = dataset[count][count2]/max_value[count2]
     return normalized_dataset
@@ -43,28 +43,41 @@ def normalize_features_numpy(dataset):
 #Distanzfuntkionen
 
 
-
-#sicherstellen dass x und y gleiche länge haben len(x) == len(y)
-#features müssen normalisiert sein [0,1]
 def distance_heom(erster, zweiter):
-    """Berechne die Distanz nach dem HEOM-Maß: Input: x, y als Listen von Features"""
+    """Berechne die Distanz nach dem HEOM-Maß: Input: x, y als Listen von Features
+    sicherstellen dass x und y gleiche länge haben len(x) == len(y)
+    features müssen normalisiert sein [0,1]"""
     distance = 0
-    for counter, _ in enumerate(erster):
-        #if nominal
+
+    #numpy_64 float
+    if isinstance(erster, str):
+        return ("strings du otto")
+    else:
+        if isinstance(erster, numbers.Number) and isinstance(zweiter, numbers.Number):
+            distance += abs(erster - zweiter)
+        else:
+            distance += 1
+
+
+    """  
+    for counter, value in enumerate(erster):
+        # if nominal - true und false
         if isinstance(erster[counter], str):
+            # distance += int(erster[counter] != zweiter[counter])
             if erster[counter] == zweiter[counter]:
                 distance += 0
             else:
                 distance += 1
-        #if continuous
+        # if continuous
         else:
             if isinstance(erster[counter], numbers.Number) \
                     and isinstance(zweiter[counter], numbers.Number):
                 distance += erster[counter] - zweiter[counter]
             else:
                 distance += 1
+                
+        """
     return distance
-
 
 
 def k_nearest_neighbour_list(dataset, parameter_k):
@@ -72,16 +85,17 @@ def k_nearest_neighbour_list(dataset, parameter_k):
     Index der Liste bezeichnet den Punkt im Datensatz"""
     neighbours = list()
     neighbours_distances = list()
-    for _, value in enumerate(dataset):
+    for value in dataset:
         mydist = [[euclidean_distance(value, value2), count2] for count2, value2 in enumerate(dataset)]
         mydist.sort()
         neighbours.append([x[1] for x in mydist[parameter_k]])
         # ab hier Erweiterung um k-Dist-Graph erstellung zu ermöglichen
         # neighbours_distances.append([y[0] for y in mydist[parameter_k]])
         neighbours = list(zip(neighbours_distances, neighbours))
-        #sortiere Reverse um den K-Dist-Graph zu erstellen
+        # sortiere Reverse um den K-Dist-Graph zu erstellen
         neighbours.sort(reverse=True)
     return neighbours
+
 
 def draw_k_dist_line(list_of_elements):
     """Berechnet den Epsilon Parameter mithilfe der knee_point Methode"""

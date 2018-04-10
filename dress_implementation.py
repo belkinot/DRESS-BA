@@ -3,6 +3,8 @@
 import math
 from Base.helper_functions import distance_heom, k_nearest_neighbour_list, draw_k_dist_line
 from sklearn.cluster import DBSCAN
+from itertools import combinations
+import numpy as np
 
 """
 ML constraints low distance
@@ -60,7 +62,7 @@ def subspace_quality_scoring(dataset_with_n_features, clustering, ml_constraints
     #Prüfe ob nl_constraints in verschiedenen Clustern sind
     nl_sat = check_nl_constraints_in_clustering(nl_constraints, clustering)
 
-    q_cons = len(ml_sat) + len(nl_sat) / (len(ml_constraints) + len(nl_constraints))
+    q_cons = (ml_sat + nl_sat) / (len(ml_constraints) + len(nl_constraints))
 
     d_nl_avg = 0
     d_ml_avg = 0
@@ -80,30 +82,30 @@ def subspace_quality_scoring(dataset_with_n_features, clustering, ml_constraints
 
     return quality
 
+
 def check_nl_constraints_in_clustering(constraints, clustering):
     """Prüft wie viele NL-Constraints erfüllt sind"""
-    #Annahme: Clustering ist eine Liste von Listen mit Indizes ((1,2,5), (3,4), (6,9), (7,8))
+    # Annahme: Clustering ist eine Liste von Listen mit Indizes ((1,2,5), (3,4), (6,9), (7,8))
     constraint_sat = 0
 
-    for _, constraint in enumerate(constraints):
-        for _, value in enumerate(clustering):
-            if constraint[0] in value:
-                if constraint[1] not in value:
+    for constraint in constraints:
+        for key in clustering:
+            if constraint[0] in clustering[key]:
+                if constraint[1] not in clustering[key]:
                     constraint_sat += 1
 
     return constraint_sat
 
 
-
 def check_ml_constraints_in_clustering(constraints, clustering):
     """Prüft wie viele ML-Constraints erfüllt sind"""
-    #Annahme: Clustering ist eine Liste von Listen mit Indizes ((1,2,5), (3,4), (6,9), (7,8))
+    # Annahme: Clustering ist eine Liste von Listen mit Indizes ((1,2,5), (3,4), (6,9), (7,8))
     constraint_sat = 0
 
-    for _, constraint in enumerate(constraints):
-        for _, value in enumerate(clustering):
-            if constraint[0] in value:
-                if constraint[1] in value:
+    for constraint in constraints:
+        for key in clustering:
+            if constraint[0] in clustering[key]:
+                if constraint[1] in clustering[key]:
                     constraint_sat += 1
 
     return constraint_sat
@@ -121,33 +123,96 @@ def clustering_dress(dataset):
 
     return 0
 
+
+def dolle_funktion(canditate_all, wert_objekt):
+    """ Erstelle eine Liste von Tupeln"""
+
+    res = [(canditate,) + (wert_objekt,) for canditate in canditate_all]
+    return res
+
+
+def create_m_dimensional_dataset(dataset_n_dimensions, candidate_i):
+    dataset_with_m_dimensions = [0 for _ in range(dataset_n_dimensions.shape[0])]
+    for value in candidate_i:
+        for idx, _ in enumerate(dataset_n_dimensions):
+            dataset_with_m_dimensions[idx] += dataset_n_dimensions[idx][value]
+
+    return dataset_with_m_dimensions
+
+
 def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_constraints):
     """erstellt die Subspaces und die Cluster"""
     current_dataset = list()
     q_best = 0
-    candidate_all = list(range(len(dataset[0])))#Anzahl der Dimensionen
+    best_subspace = 0
+    candidate_all = list(range(len(dataset[0])))  # Anzahl der Dimensionen
 
-    #erstelle 1-Dimensionalen Datensatz
+    # erstelle 1-Dimensionalen Datensatz
     for i in candidate_all:
-        for _, value in enumerate(dataset):
+        current_dataset = list()
+        for value in dataset:
             current_dataset.append(value[i])
+        current_numpy_dataset = np.array(current_dataset, float)
+        current_numpy_dataset = current_numpy_dataset.reshape(-1, 1)
+        # Cluster DBSCAN
+        clustering = DBSCAN().fit_predict(X=current_numpy_dataset)
+        my_clustering = dict()
 
-        #Cluster DBSCAN
-        clustering = DBSCAN()
-        #Berechne q(s) und speichere diesen Wert
-        q_s = subspace_quality_scoring(current_dataset, clustering, ml_constraints=ml_constraints, nl_constraints=nl_constraints)
+        for idx, value in enumerate(clustering):
+            if not value in my_clustering.keys():
+                my_clustering[value] = []
+            my_clustering[value].append(idx)
+        # Berechne q(s) und speichere diesen Wert
+        q_s = subspace_quality_scoring(current_dataset, my_clustering, ml_constraints=ml_constraints, nl_constraints=nl_constraints)
         if q_s > q_best:
             q_best = q_s
-            best_subspace = candidate_all[i]
-        #Vergleiche alle q(s) und wähle q_best(S)
+            best_subspace = i
+        # Vergleiche alle q(s) und wähle q_best(S)
 
-    # entferne besten Subspace aus der Liste C_all
+    # entferne besten Subspace aus der Liste C_all1
     candidate_all.remove(best_subspace)
-    #merge mit bestem subspace:
+
+    #candidate_all = [{a,} for a in candidate_all]
+    #candidate_all = [set(candidate_all)]
+
+
     candidate_i = list()
-    for _, value2 in enumerate(candidate_all):
-        helplist = (best_subspace, value2)  #Problem von Listen in Listen - wie kann man dies umgehen?
-        candidate_i.append(helplist)
+    # merge mit bestem subspace:
+    candidate_i = dolle_funktion(candidate_all, best_subspace)
+
+    for value in candidate_i:
+        current_dataset = create_m_dimensional_dataset(dataset, value)
+        current_numpy_dataset = np.array(current_dataset, float)
+        current_numpy_dataset = current_numpy_dataset.reshape(-1, 1)
+        clustering = DBSCAN().fit_predict(current_numpy_dataset)
+        my_clustering = dict()
+        for idx, value2 in enumerate(clustering):
+            if not value2 in my_clustering.keys():
+                my_clustering[value2] = []
+            my_clustering[value2].append(idx)
+            # Berechne q(s) und speichere diesen Wert
+        q_s = subspace_quality_scoring(current_dataset, my_clustering, ml_constraints=ml_constraints,
+                                       nl_constraints=nl_constraints)
+
+        if q_s > q_best:
+            q_best = q_s
+            best_subspace = value
+    for i in best_subspace:
+        if i in candidate_all:
+            candidate_all.remove(i)
+    print(best_subspace)
+    candidate_i = dolle_funktion(candidate_all, best_subspace)
+    print(candidate_i)
+    print(candidate_all)
+
+
+
+    #candidate_i = list()
+    #for value2 in candidate_all:
+     #   help_subspace.append(value2)# Problem von Listen in Listen - wie kann man dies umgehen?
+      #  helplist = help_subspace
+       # candidate_i.append(helplist)
+      #  helplist = list()
 
     #Cluster DBSCAN mit neuem current dataset
     #TODO: Erstelle m-Dimensionalen Datensatz aus n-Dimensionalem (oder merke dir nur die genutzten Dimensionen im richtigen Datenformat) wobei m < n
@@ -159,7 +224,7 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
      setOfCandidateSubspaces hat alle Features (Dimensionen)
      Iteration 2 (Subspace der Größe 2) für jeden Supspace in C_i (Candidate)
      wird q(s) berechnet (nach dem Clustering)
-     Wähle S_Best von c_all
+     Wähle S_Best von c_al
      q(S_best) vereinige S_best mit allen noch vorhandenen Subspaces in C_all
     
      Vereinfachung: S_best vereinigt S, wobei S_best geschnitten S = Leere Menge
