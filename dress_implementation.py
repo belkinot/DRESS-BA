@@ -225,8 +225,7 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
      Iteration 2 (Subspace der Größe 2) für jeden Supspace in C_i (Candidate)
      wird q(s) berechnet (nach dem Clustering)
      Wähle S_Best von c_al
-     q(S_best) vereinige S_best mit allen noch vorhandenen Subspaces in C_all
-    
+     q(S_best) vereinige S_best mit allen noch vorhandenen Subspaces in C_all    
      Vereinfachung: S_best vereinigt S, wobei S_best geschnitten S = Leere Menge
      S_dist = S_best wenn q_dist(S_best) >= q_dist(S*), sonst
      S_dist = S*

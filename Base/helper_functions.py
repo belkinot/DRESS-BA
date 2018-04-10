@@ -51,13 +51,12 @@ def distance_heom(erster, zweiter):
 
     #numpy_64 float
     if isinstance(erster, str):
-        return ("strings du otto")
+        return "strings du otto"
     else:
         if isinstance(erster, numbers.Number) and isinstance(zweiter, numbers.Number):
             distance += abs(erster - zweiter)
         else:
             distance += 1
-
 
     """  
     for counter, value in enumerate(erster):
@@ -74,9 +73,7 @@ def distance_heom(erster, zweiter):
                     and isinstance(zweiter[counter], numbers.Number):
                 distance += erster[counter] - zweiter[counter]
             else:
-                distance += 1
-                
-        """
+                distance += 1"""
     return distance
 
 
@@ -123,4 +120,4 @@ def euclidean_distance(point_one, point_two):
 
 def eval_sensitivity(clustering):
     """Sensitivity"""
-    return 0
+    return clustering

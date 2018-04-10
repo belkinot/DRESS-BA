@@ -3,8 +3,8 @@
 import time
 from sklearn.datasets import load_iris
 from sklearn import preprocessing
-from Base.helper_functions import normalize_features, normalize_features_numpy
-from dress_implementation import *
+from Base.helper_functions import normalize_features_numpy
+from dress_implementation import subspace_processing_and_cluster_generation
 
 if __name__ == '__main__':
 
@@ -25,8 +25,8 @@ if __name__ == '__main__':
     # for i in range(len(normalized_X)):
     #    print(normalized_X_self_numpy[i] - normalized_X[i])
 
-    ml_constraint = [(1,2), (140,141), (30,31)]
-    nl_constraint = [(1,140), (2,83)]
+    ml_constraint = [(1, 2), (140, 141), (30, 31)]
+    nl_constraint = [(1, 140), (2, 83)]
 
     #print(normalized_X_self_numpy)
     subspace_processing_and_cluster_generation(normalized_X_self_numpy, ml_constraint, nl_constraint)
