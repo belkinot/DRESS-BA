@@ -140,14 +140,36 @@ def create_m_dimensional_dataset(dataset_n_dimensions, candidate_i):
     return dataset_with_m_dimensions
 
 
+def create_candidate_i(candidate_all, best_subspace):
+    candidate_i = list()
+    for i in candidate_all:
+        d = best_subspace + (i,)
+        candidate_i += (d,)
+    return candidate_i
+
+
+def create_clustering(dataset, candidate_i_value):
+    """Erstelle aus dem ursprünglichen Datensatz und dem Kandidaten einen neuen Datensatz und clustere diesen"""
+
+    current_dataset = create_m_dimensional_dataset(dataset, candidate_i_value)
+    current_numpy_dataset = np.array(current_dataset, float)
+    current_numpy_dataset = current_numpy_dataset.reshape(-1, 1)
+    clustering = DBSCAN().fit_predict(current_numpy_dataset)
+    my_clustering = dict()
+    for idx, value2 in enumerate(clustering):
+        if not value2 in my_clustering.keys():
+            my_clustering[value2] = []
+        my_clustering[value2].append(idx)
+
+    return my_clustering, current_dataset
+
 def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_constraints):
     """erstellt die Subspaces und die Cluster"""
-    current_dataset = list()
-    q_best = 0
-    best_subspace = 0
+    q_best = 0 # initiales q_best
+    best_subspace = 0 # initialer bester subspace
     candidate_all = list(range(len(dataset[0])))  # Anzahl der Dimensionen
 
-    # erstelle 1-Dimensionalen Datensatz
+    # erstelle 1-Dimensionalen Datensatz - noch auslagerbar in eine Funktion?
     for i in candidate_all:
         current_dataset = list()
         for value in dataset:
@@ -168,51 +190,17 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
             q_best = q_s
             best_subspace = i
         # Vergleiche alle q(s) und wähle q_best(S)
-
     # entferne besten Subspace aus der Liste C_all1
     candidate_all.remove(best_subspace)
 
-    #candidate_all = [{a,} for a in candidate_all]
-    #candidate_all = [set(candidate_all)]
-
-
-    candidate_i = list()
     # merge mit bestem subspace:
     candidate_i = dolle_funktion(candidate_all, best_subspace)
+    # ab hier 2 bis n - Dimensionale Datensätze
+    best_subspace, candidate_i = dress_iteration(best_subspace, candidate_all, candidate_i, dataset, ml_constraints,
+                                                 nl_constraints, q_best)
 
-    for value in candidate_i:
-        current_dataset = create_m_dimensional_dataset(dataset, value)
-        current_numpy_dataset = np.array(current_dataset, float)
-        current_numpy_dataset = current_numpy_dataset.reshape(-1, 1)
-        clustering = DBSCAN().fit_predict(current_numpy_dataset)
-        my_clustering = dict()
-        for idx, value2 in enumerate(clustering):
-            if not value2 in my_clustering.keys():
-                my_clustering[value2] = []
-            my_clustering[value2].append(idx)
-            # Berechne q(s) und speichere diesen Wert
-        q_s = subspace_quality_scoring(current_dataset, my_clustering, ml_constraints=ml_constraints,
-                                       nl_constraints=nl_constraints)
-
-        if q_s > q_best:
-            q_best = q_s
-            best_subspace = value
-    for i in best_subspace:
-        if i in candidate_all:
-            candidate_all.remove(i)
     print(best_subspace)
-    candidate_i = dolle_funktion(candidate_all, best_subspace)
-    print(candidate_i)
-    print(candidate_all)
 
-
-
-    #candidate_i = list()
-    #for value2 in candidate_all:
-     #   help_subspace.append(value2)# Problem von Listen in Listen - wie kann man dies umgehen?
-      #  helplist = help_subspace
-       # candidate_i.append(helplist)
-      #  helplist = list()
 
     #Cluster DBSCAN mit neuem current dataset
     #TODO: Erstelle m-Dimensionalen Datensatz aus n-Dimensionalem (oder merke dir nur die genutzten Dimensionen im richtigen Datenformat) wobei m < n
@@ -245,6 +233,27 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
     Iteration stoppt wenn C_all leer ist
     """
     return best_subspace
+
+
+def dress_iteration(best_subspace, candidate_all, candidate_i, dataset, ml_constraints, nl_constraints, q_best):
+    for candidate_value in candidate_i:
+        my_clustering_temp, current_dataset = create_clustering(dataset, candidate_value)
+        q_s = subspace_quality_scoring(current_dataset, my_clustering_temp, ml_constraints, nl_constraints)
+        if q_s > q_best:
+            q_best = q_s
+            best_subspace = candidate_value
+        # Abbruchkriterum - Candidates sind so mächtig wie die Anzahl der Dimensionen - Entspricht Clustering auf dem gesamtem Datensatz
+    if len(candidate_i[0]) != len(dataset[0]):
+        for i in best_subspace:
+            if i in candidate_all:
+                candidate_all.remove(i)
+        if len(candidate_all) > 0:
+            candidate_i = create_candidate_i(candidate_all, best_subspace)
+            return dress_iteration(best_subspace, candidate_all, candidate_i, dataset, ml_constraints, nl_constraints, q_best)
+    else:
+        return best_subspace, candidate_i
+
+
 
 
 
