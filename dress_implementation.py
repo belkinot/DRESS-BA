@@ -5,6 +5,8 @@ from Base.helper_functions import distance_heom, k_nearest_neighbour_list, draw_
 from sklearn.cluster import DBSCAN
 import numpy as np
 
+# TODO: fuktionen kapseln
+
 """
 ML constraints low distance
 NL constraints have high distance to each other - search for subspaces
