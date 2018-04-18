@@ -11,9 +11,8 @@ NL constraints have high distance to each other - search for subspaces
 Dress generiert potential candidate subspaces (select best subspace)
 Add Features to the subspace - Candidate Subspaces(merging step)
 Filtering - dann errechne quality scores durch clustering
-Cleaning - candidate subspaces
-Pseudocode
-Start subspace mit Mächtigkeit 1 (1 Feature) C_all enthält alle features
+Cleaning - candidate subspaces 
+Pseudocode Start subspace mit Mächtigkeit 1 (1 Feature) C_all enthält alle features
 berechne q(S) = q_const(S) * q_dist(S) 
 Choose S_best von C_all --> q(S_best) = q_best
 Vereinige S_best mit jedem Subspace von C_all --> neue Candidatsubspaces C_i
@@ -25,7 +24,7 @@ Clustere jeden Subspace mit DBSCAN
 Errechne q(S) 
 Subspace bleibt erhalten, wenn q(S) > q_best (q(S_best))
 C_all vereinigt mit C_i am ende der Iteration i
-S* und S_best werden von C_all entfernt, neue Iteration beginnt"""
+S* und S_best werden von C_all entfernt, neue Iteration beginnt """
 
 
 def subspace_quality_scoring(dataset_with_n_features, clustering, ml_constraints, nl_constraints):
@@ -55,6 +54,7 @@ def subspace_quality_scoring(dataset_with_n_features, clustering, ml_constraints
 
     q_dist = d_nl_avg - d_ml_avg
     # Errechne Qualität
+
     quality = q_cons * q_dist
 
     return quality
@@ -135,7 +135,9 @@ def create_clustering(dataset, candidate_i_value):
     current_dataset = create_m_dimensional_dataset(dataset, candidate_i_value)
     current_numpy_dataset = np.array(current_dataset, float)
     current_numpy_dataset = current_numpy_dataset.reshape(-1, 1)
-    clustering = DBSCAN().fit_predict(current_numpy_dataset)
+    minpts = round(math.log1p(len(dataset)))
+    epsilon = draw_k_dist_line(k_nearest_neighbour_list(current_numpy_dataset, minpts))
+    clustering = DBSCAN(min_samples=minpts, eps=epsilon).fit_predict(current_numpy_dataset)
     my_clustering = dict()
     for idx, value2 in enumerate(clustering):
         if not value2 in my_clustering.keys():
@@ -158,7 +160,9 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
         current_numpy_dataset = np.array(current_dataset, float)
         current_numpy_dataset = current_numpy_dataset.reshape(-1, 1)
         # Cluster DBSCAN
-        clustering = DBSCAN().fit_predict(X=current_numpy_dataset)
+        minpts = round(math.log1p(len(dataset)))
+        epsilon = draw_k_dist_line(k_nearest_neighbour_list(current_numpy_dataset, minpts))
+        clustering = DBSCAN(min_samples=minpts, eps=epsilon).fit_predict(X=current_numpy_dataset)
         my_clustering = dict()
 
         for idx, value in enumerate(clustering):
@@ -168,20 +172,20 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
         # Berechne q(s) und speichere diesen Wert
         q_s = subspace_quality_scoring(current_dataset, my_clustering,
                                        ml_constraints=ml_constraints, nl_constraints=nl_constraints)
+        print(q_s, "Qualitätsmaß")
         if q_s > q_best:
             q_best = q_s
             best_subspace = i
         # Vergleiche alle q(s) und wähle q_best(S)
     # entferne besten Subspace aus der Liste C_all1
+    print(best_subspace, "bester supspace 1 Dimension")
     candidate_all.remove(best_subspace)
-
+    print(candidate_all, "Initial Candidate all")
     # merge mit bestem subspace:
     candidate_i = dolle_funktion(candidate_all, best_subspace)
     # ab hier 2 bis n - Dimensionale Datensätze
     best_subspace, candidate_i = dress_iteration(best_subspace, candidate_all, candidate_i, dataset,
                                                  ml_constraints, nl_constraints, q_best)
-
-    print(best_subspace)
 
     """startet mit subspaces der größe 1
      setOfCandidateSubspaces hat alle Features (Dimensionen)
@@ -208,6 +212,8 @@ def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_const
 def dress_iteration(best_subspace, candidate_all, candidate_i, dataset,
                     ml_constraints, nl_constraints, q_best):
     """Iteration von Dress """
+    q_old_best = q_best
+    print(candidate_i, "Candidate i ")
     for candidate_value in candidate_i:
         my_clustering_temp, current_dataset = create_clustering(dataset, candidate_value)
         q_s = subspace_quality_scoring(current_dataset, my_clustering_temp,
@@ -217,14 +223,22 @@ def dress_iteration(best_subspace, candidate_all, candidate_i, dataset,
             best_subspace = candidate_value
         # Abbruchkriterum - Candidates sind so mächtig wie die Anzahl der Dimensionen -
         # Entspricht Clustering auf dem gesamtem Datensatz
+        print(best_subspace, "Bester Subspace")
+
+        # TODO: schmiert hier ab, wenn kein 2 Dimensionaler besserer Subspace gefunden wird...
     if len(candidate_i[0]) != len(dataset[0]):
         for i in best_subspace:
             if i in candidate_all:
                 candidate_all.remove(i)
+            else:
+                if q_old_best == q_best:
+                    return best_subspace, candidate_i
         if len(candidate_all) > 0:
             candidate_i = create_candidate_i(candidate_all, best_subspace)
+            print(best_subspace, "Best Subspace")
+            print(candidate_all, "Candidate_all")
+            print(candidate_i, "Candidates")
             return dress_iteration(best_subspace, candidate_all, candidate_i, dataset,
                                    ml_constraints, nl_constraints, q_best)
     else:
         return best_subspace, candidate_i
-
