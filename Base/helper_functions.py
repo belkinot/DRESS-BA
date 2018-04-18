@@ -90,10 +90,10 @@ def k_nearest_neighbour_list(dataset, parameter_k):
         mydist = [[euclidean_distance(value, value2), count2] for count2, value2 in enumerate(dataset)]
         mydist.sort()
         neighbours.append(mydist[parameter_k])
-        # ab hier Erweiterung um k-Dist-Graph erstellung zu ermöglichen
-        # neighbours_distances.append([y[0] for y in mydist[parameter_k]])
-        #neighbours = list(zip(neighbours_distances, neighbours))
-        # sortiere Reverse um den K-Dist-Graph zu erstellen
+    # ab hier Erweiterung um k-Dist-Graph erstellung zu ermöglichen
+    # neighbours_distances.append([y[0] for y in mydist[parameter_k]])
+    #neighbours = list(zip(neighbours_distances, neighbours))
+    # sortiere Reverse um den K-Dist-Graph zu erstellen
     neighbours.sort(reverse=True)
     return neighbours
 
@@ -104,7 +104,7 @@ def draw_k_dist_line(list_of_elements):
     for value in list_of_elements:
         list_of_elements_new.append(value[0])
     point_b = list_of_elements_new[0]
-    point_a = list_of_elements_new[len(list_of_elements_new)-1]
+    point_a = list_of_elements_new[-1] # letzter Eintrag
     # y = m*x+b
     steigung = (point_a-point_b)/len(list_of_elements)
 

@@ -34,15 +34,22 @@ if __name__ == '__main__':
     ml_constraint = [(1, 2), (140, 141), (30, 31)]
     nl_constraint = [(1, 140), (2, 83)]
 
-    #print(normalized_X_self_numpy)
+    #print()
     subspace_processing_and_cluster_generation(normalized_X, ml_constraint, nl_constraint)
 
     """
-    f = "ship"
-    data = np.genfromtxt(f + '.csv', delimiter=',')
+    
+    f = "ship.csv"
+    #data = np.array(np.empty(), )
+    data = []
+    with open(f, 'r') as file:
+        for line in file.readlines():
+            #temp = eval(line)
+            temp = line.split(',')
+            temp = temp[3:]
+            data.append(temp)
 
-    print(data[0][1])
+    print(data[0])
     print(data[0][4])
     """
-
     print("My Programm took", time.time()-START_TIME, "to run")

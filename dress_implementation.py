@@ -88,20 +88,6 @@ def check_ml_constraints_in_clustering(constraints, clustering):
     return constraint_sat
 
 
-def clustering_dress(dataset):
-    """Dress algorithmus"""
-    minpts = round(math.log1p(len(dataset)))
-
-    epsilon = draw_k_dist_line(k_nearest_neighbour_list(dataset, minpts))
-    # Distance of every point in our subspace to its m'th nearest neighbour
-    # and sort this list in ascending order
-    # create an m-dist graph ?????? Nachfragen!!!
-
-    dataset.DBSCAN(epsilon, minpts)
-
-    return 0
-
-
 def dolle_funktion(canditate_all, wert_objekt):
     """ Erstelle eine Liste von Tupeln"""
 
@@ -145,6 +131,7 @@ def create_clustering(dataset, candidate_i_value):
         my_clustering[value2].append(idx)
 
     return my_clustering, current_dataset
+
 
 def subspace_processing_and_cluster_generation(dataset, ml_constraints, nl_constraints):
     """erstellt die Subspaces und die Cluster"""
