@@ -50,20 +50,21 @@ def distance_heom(erster, zweiter):
     features müssen normalisiert sein [0,1]"""
     distance = 0
 
-    #numpy_64 float
+    # numpy_64 float
+    # if nominal - true and false
     if isinstance(erster, str):
         if erster == zweiter:
             distance += 0
         else:
             distance += 1
     else:
+    # if continuous
         if isinstance(erster, numbers.Number) and isinstance(zweiter, numbers.Number):
             distance += abs(erster - zweiter)
         else:
             distance += 1
 
-    """  
-    for counter, value in enumerate(erster):
+    """for counter, value in enumerate(erster):
         # if nominal - true und false
         if isinstance(erster[counter], str):
             # distance += int(erster[counter] != zweiter[counter])
@@ -77,7 +78,7 @@ def distance_heom(erster, zweiter):
                     and isinstance(zweiter[counter], numbers.Number):
                 distance += erster[counter] - zweiter[counter]
             else:
-                distance += 1"""
+                distance += 1 """
     return distance
 
 
@@ -85,14 +86,14 @@ def k_nearest_neighbour_list(dataset, parameter_k):
     """Gibt eine Liste mit den Distanzen des k-ten Nachbars von jedem Punkt aus.
     Index der Liste bezeichnet den Punkt im Datensatz"""
     neighbours = list()
-    neighbours_distances = list()
+    # neighbours_distances = list()
     for value in dataset:
         mydist = [[euclidean_distance(value, value2), count2] for count2, value2 in enumerate(dataset)]
         mydist.sort()
         neighbours.append(mydist[parameter_k])
     # ab hier Erweiterung um k-Dist-Graph erstellung zu ermöglichen
     # neighbours_distances.append([y[0] for y in mydist[parameter_k]])
-    #neighbours = list(zip(neighbours_distances, neighbours))
+    # neighbours = list(zip(neighbours_distances, neighbours))
     # sortiere Reverse um den K-Dist-Graph zu erstellen
     neighbours.sort(reverse=True)
     return neighbours

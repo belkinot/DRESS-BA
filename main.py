@@ -2,12 +2,12 @@
 
 import time
 import numpy as np
-from sklearn.datasets import load_iris, load_breast_cancer
+from sklearn.datasets import load_iris, load_wine, load_breast_cancer
 from sklearn import preprocessing
 from Base.helper_functions import normalize_features_numpy
 from scipy.io import arff
 from io import StringIO
-from dress_implementation import subspace_processing_and_cluster_generation
+from dress_implementation import subspace_processing_dress
 
 if __name__ == '__main__':
 
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     nl_constraint = [(1, 140), (2, 83)]
 
     #print()
-    subspace_processing_and_cluster_generation(normalized_X, ml_constraint, nl_constraint)
+    subspace_processing_dress(normalized_X, ml_constraint, nl_constraint)
 
     """
     
