@@ -5,7 +5,9 @@ import numpy as np
 
 def normalize_features(dataset):
     """normalisiere alle Features
-        Bedenke letzten Eintrag im Dataset - Clusterzugehörigkeit? ML Constraint?"""
+        Bedenke letzten Eintrag im Dataset - Clusterzugehörigkeit? ML Constraint?
+        Input: dataset
+        Return: dataset normalisiert """
 
     normalized_dataset = dataset
     # for i in range(len(dataset[0])):
@@ -15,14 +17,16 @@ def normalize_features(dataset):
     for count, value in enumerate(dataset):
         for count2, value2 in enumerate(value):
             # Sicherstellen, dass es Zahlenwerte sind
-            if isinstance(max_value[count2], numbers.Number) and max_value[count2] <= value2:
+            if isinstance(max_value[count2], numbers.Number) and \
+                    isinstance(value2, numbers.Number) and max_value[count2] <= value2:
                 # get my maximum value
                 max_value[count2] = value2
 
     for count, value in enumerate(dataset):
         for count2, _ in enumerate(value):
             # erneut sicherstellen, dass es Zahlenwerte sind
-            if isinstance(max_value[count2], numbers.Number):
+            if isinstance(max_value[count2], numbers.Number) and \
+                    isinstance(dataset[count][count2], numbers.Number):
                 normalized_dataset[count][count2] = dataset[count][count2]/max_value[count2]
     return normalized_dataset
 
@@ -31,7 +35,8 @@ def normalize_features_numpy(dataset):
     """normalisiere alle Features
         Bedenke letzten Eintrag im Dataset - Clusterzugehörigkeit? ML Constraint?"""
 
-    normalized_dataset = dataset
+    #normalized_dataset = dataset
+    normalized_dataset = np.array(dataset, dtype=float)
     max_value = dataset.max(0) #Krasse Numpy-Array Magic
     print(max_value, "max value")
     for count, value in enumerate(dataset):
@@ -52,15 +57,16 @@ def distance_heom(erster, zweiter):
 
     # numpy_64 float
     # if nominal - true and false
+    # if len(erster) == len(zweiter):
     if isinstance(erster, str):
-        if erster == zweiter:
+        if erster == zweiter and erster != '?':
             distance += 0
         else:
             distance += 1
     else:
     # if continuous
         if isinstance(erster, numbers.Number) and isinstance(zweiter, numbers.Number):
-            distance += abs(erster - zweiter)
+            distance += abs(erster - zweiter)  # Prüfen ob absolut hier richtig ist
         else:
             distance += 1
 
@@ -88,6 +94,7 @@ def k_nearest_neighbour_list(dataset, parameter_k):
     neighbours = list()
     # neighbours_distances = list()
     for value in dataset:
+        #if isinstance(value, numbers.Number): eigentlich kann ich doch nur continous werte clustern oder?
         mydist = [[euclidean_distance(value, value2), count2] for count2, value2 in enumerate(dataset)]
         mydist.sort()
         neighbours.append(mydist[parameter_k])
@@ -126,6 +133,25 @@ def draw_k_dist_line(list_of_elements):
 def euclidean_distance(point_one, point_two):
     """Berechnet die euklidische Distanz von zwei Punkten"""
     return np.linalg.norm(point_one-point_two)
+
+def format_dataset(data):
+    """Formatierte den SHIP-Datensatz
+    Wandele Zahlenwerte in Floats um, den Rest behalte als String"""
+    zahlenwerte = 0
+    keine_zahlenwerte = 0
+    for value in data:
+        for idx, value2 in enumerate(value):
+            try:
+                float(value2)
+                value[idx] = float(value2)
+                zahlenwerte += 1
+            except ValueError:
+                keine_zahlenwerte += 1
+                # if value2 == '?':
+                #    value[idx] = float('inf')
+                # else:
+                value[idx] = value2.strip('\'')
+    print(zahlenwerte, 'Digits', keine_zahlenwerte, 'keine digits')
 
 #TODO: Evaluierungsmetriken Sensitivity, specificity, accuracy, AUC, F-Measure"""
 

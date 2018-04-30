@@ -60,14 +60,7 @@ def create_1_dimensional_result(dataset, candidate_all, q_best, ml_constraints, 
         # Cluster DBSCAN
         minpts = round(math.log1p(len(dataset)))
         epsilon = draw_k_dist_line(k_nearest_neighbour_list(current_numpy_dataset, minpts))
-        clustering = DBSCAN(min_samples=minpts, eps=epsilon, metric=distance_heom).\
-            fit_predict(X=current_numpy_dataset)
-        my_clustering = dict()
-
-        for idx, value in enumerate(clustering):
-            if not value in my_clustering.keys():
-                my_clustering[value] = []
-            my_clustering[value].append(idx)
+        my_clustering = create_clustering_dict(current_numpy_dataset, minpts, epsilon)
         # Berechne q(s) und speichere diesen Wert
         q_s = subspace_quality_scoring(current_dataset, my_clustering,
                                        ml_constraints=ml_constraints, nl_constraints=nl_constraints)
@@ -210,12 +203,25 @@ def create_clustering(dataset, candidate_i_value):
     current_numpy_dataset = current_numpy_dataset.reshape(-1, 1)
     minpts = round(math.log1p(len(dataset)))
     epsilon = draw_k_dist_line(k_nearest_neighbour_list(current_numpy_dataset, minpts))
-    clustering = DBSCAN(min_samples=minpts, eps=epsilon, metric=distance_heom).\
+    my_clustering = create_clustering_dict(current_numpy_dataset, epsilon, minpts)
+
+
+    return my_clustering, current_dataset
+
+
+def create_clustering_dict(current_numpy_dataset, epsilon, minpts):
+    """
+
+    :param current_numpy_dataset:
+    :param epsilon:
+    :param minpts:
+    :return:
+    """
+    clustering = DBSCAN(min_samples=minpts, eps=epsilon, metric=distance_heom). \
         fit_predict(current_numpy_dataset)
     my_clustering = dict()
     for idx, value2 in enumerate(clustering):
         if not value2 in my_clustering.keys():
             my_clustering[value2] = []
         my_clustering[value2].append(idx)
-
-    return my_clustering, current_dataset
+    return my_clustering
