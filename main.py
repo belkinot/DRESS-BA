@@ -1,11 +1,11 @@
 """Main-Klasse"""
 
 import time
-import numbers
-import numpy as np
-from sklearn.datasets import load_iris, load_wine, load_breast_cancer
-from sklearn import preprocessing
-from Base.helper_functions import normalize_features_numpy, normalize_features, format_dataset
+# import numbers
+# import numpy as np
+from sklearn.datasets import load_iris# , load_wine
+# from sklearn import preprocessing
+from Base.helper_functions import normalize_features# , normalize_features_numpy, format_dataset
 from dress_implementation import subspace_processing_dress
 
 
@@ -15,33 +15,30 @@ if __name__ == '__main__':
 
     START_TIME = time.time()
 
-    irisdataset = load_iris()
+    IRIS_DATASET = load_iris()
 
-
-
-    X = irisdataset.data
-    Y = irisdataset.target
+    X = IRIS_DATASET.data
+    Y = IRIS_DATASET.target
 
     print("Anzahl der Datensätze", len(X))
     print("Anzah der Dimensionen", len(X[0]))
 
     # print(X[0], "X an stelle 0")
 
-    normalized_X_self = normalize_features(X)
+    NORMALIZED_X_SELF = normalize_features(X)
     #normalized_X = preprocessing.normalize(X, 'max', 0)
     #normalized_X_self_numpy = normalize_features_numpy(X)
 
     # for i in range(len(normalized_X)):
     #    print(normalized_X_self_numpy[i] - normalized_X[i])
 
-    ml_constraint = [(1, 2), (140, 141), (30, 31)]
-    nl_constraint = [(1, 140), (2, 83)]
+    ML_CONSTRAINT = [(1, 2), (140, 141), (30, 31)]
+    NL_CONSTRAINT = [(1, 140), (2, 83)]
 
     #print()
-    subspace_processing_dress(normalized_X_self, ml_constraint, nl_constraint)
+    subspace_processing_dress(NORMALIZED_X_SELF, ML_CONSTRAINT, NL_CONSTRAINT)
 
-    """
-    
+    """ 
     f = "ship.csv"
     #data = np.array(np.empty(), )
     data = []

@@ -1,12 +1,8 @@
 """Implementation des DRESS-Algorithmus"""
-
 import math
-from Base.helper_functions import distance_heom, k_nearest_neighbour_list, draw_k_dist_line
-from sklearn.cluster import DBSCAN
 import numpy as np
-
-# TODO: fuktionen kapseln
-
+from sklearn.cluster import DBSCAN
+from Base.helper_functions import distance_heom, k_nearest_neighbour_list, draw_k_dist_line
 
 def subspace_processing_dress(dataset, ml_constraints, nl_constraints):
     """erstellt die Subspaces und die Cluster"""
@@ -22,7 +18,7 @@ def subspace_processing_dress(dataset, ml_constraints, nl_constraints):
     print(candidate_all, "Initial Candidate all")
     # merge mit bestem subspace:
     candidate_i = dolle_funktion(candidate_all, best_subspace)
-    # ab hier 2 bis n - Dimensionale Datensätze
+    # ab hier 2 bis n - Dimensionale Datensätze - rekursiv
     best_subspace, candidate_i = dress_iteration(best_subspace, candidate_all, candidate_i, dataset,
                                                  ml_constraints, nl_constraints, q_best)
 
@@ -50,7 +46,7 @@ Iteration stoppt, wenn C_all leer ist"""
 
 
 def create_1_dimensional_result(dataset, candidate_all, q_best, ml_constraints, nl_constraints):
-    """ Erstellt die Ergebnisse für 1 Dimensionale Subspaces  """
+    """ Berechnet das Qualitätsmaß für die erste Iteration (1-Dimensional)  """
     for i in candidate_all:
         current_dataset = list()
         for value in dataset:
@@ -67,7 +63,7 @@ def create_1_dimensional_result(dataset, candidate_all, q_best, ml_constraints, 
         print(q_s, "Qualitätsmaß")
         if q_s > q_best:
             q_best = q_s
-            best_subspace = i
+            # best_subspace = i wozu?
     return q_best
 
 
@@ -85,13 +81,13 @@ def subspace_quality_scoring(dataset_with_n_features, clustering, ml_constraints
     d_nl_avg = 0
     d_ml_avg = 0
 
-    for _, value in enumerate(nl_constraints):
+    for value in nl_constraints:
         # Indizes 0 und 1 für das korrekte Ansprechen der Tupelpaare
         d_nl_avg += distance_heom(dataset_with_n_features[value[0]],
                                   dataset_with_n_features[value[1]])
     d_nl_avg = d_nl_avg/len(nl_constraints)# Average Distanz des gesamten NL sets??
 
-    for _, value in enumerate(ml_constraints):
+    for value in ml_constraints:
         d_ml_avg += distance_heom(dataset_with_n_features[value[0]],
                                   dataset_with_n_features[value[1]])
     d_ml_avg = d_ml_avg/len(ml_constraints)
@@ -163,7 +159,7 @@ def dress_iteration(best_subspace, candidate_all, candidate_i, dataset,
             else:
                 if q_old_best == q_best:
                     return best_subspace, candidate_i
-        if len(candidate_all) > 0:
+        if candidate_all: # vorher len(candidate_all) > 0
             candidate_i = create_candidate_i(candidate_all, best_subspace)
             print(best_subspace, "Best Subspace")
             print(candidate_all, "Candidate_all")
@@ -204,7 +200,6 @@ def create_clustering(dataset, candidate_i_value):
     minpts = round(math.log1p(len(dataset)))
     epsilon = draw_k_dist_line(k_nearest_neighbour_list(current_numpy_dataset, minpts))
     my_clustering = create_clustering_dict(current_numpy_dataset, epsilon, minpts)
-
 
     return my_clustering, current_dataset
 
