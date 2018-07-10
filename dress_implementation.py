@@ -2,7 +2,7 @@
 import math
 import numpy as np
 from sklearn.cluster import DBSCAN
-from Base.helper_functions import distance_heom, k_nearest_neighbour_list, draw_k_dist_line
+from Base.helper_functions import distance_heom, k_nearest_neighbour_list, draw_k_dist_line, distance_heom_dbscan
 
 def subspace_processing_dress(dataset, ml_constraints, nl_constraints):
     """erstellt die Subspaces und die Cluster"""
@@ -50,7 +50,10 @@ def create_1_dimensional_result(dataset, candidate_all, q_best, ml_constraints, 
     for i in candidate_all:
         current_dataset = list()
         for value in dataset:
-            current_dataset.append(value[i])
+            if value[i] != '?':
+                current_dataset.append(value[i])
+            else:
+                current_dataset.append(9999)
         current_numpy_dataset = np.array(current_dataset, float)
         current_numpy_dataset = current_numpy_dataset.reshape(-1, 1)
         # Cluster DBSCAN
@@ -83,7 +86,7 @@ def subspace_quality_scoring(dataset_with_n_features, clustering, ml_constraints
 
     for value in nl_constraints:
         # Indizes 0 und 1 für das korrekte Ansprechen der Tupelpaare
-        d_nl_avg += distance_heom(dataset_with_n_features[value[0]],
+        d_nl_avg += distance_heom_dbscan(dataset_with_n_features[value[0]],
                                   dataset_with_n_features[value[1]])
     d_nl_avg = d_nl_avg/len(nl_constraints)# Average Distanz des gesamten NL sets??
 
@@ -140,6 +143,7 @@ def dress_iteration(best_subspace, candidate_all, candidate_i, dataset,
     """Iteration von Dress - Rekursiv """
     q_old_best = q_best
     print(candidate_i, "Candidate i ")
+    print("mehrdimensionale Datensätze")
     for candidate_value in candidate_i:
         my_clustering_temp, current_dataset = create_clustering(dataset, candidate_value)
         q_s = subspace_quality_scoring(current_dataset, my_clustering_temp,
@@ -173,10 +177,10 @@ def dress_iteration(best_subspace, candidate_all, candidate_i, dataset,
 
 def create_m_dimensional_dataset(dataset_n_dimensions, candidate_i):
     """Erstellt ein m-Dimensionales Dataset aus einem n-Dimensionalen m < n"""
-    dataset_with_m_dimensions = [0 for _ in range(dataset_n_dimensions.shape[0])]
+    dataset_with_m_dimensions = [[] for _ in range(dataset_n_dimensions.shape[0])]
     for value in candidate_i:
         for idx, _ in enumerate(dataset_n_dimensions):
-            dataset_with_m_dimensions[idx] += dataset_n_dimensions[idx][value]
+            dataset_with_m_dimensions[idx].append(dataset_n_dimensions[idx][value])
 
     return dataset_with_m_dimensions
 
@@ -212,8 +216,9 @@ def create_clustering_dict(current_numpy_dataset, epsilon, minpts):
     :param minpts:
     :return:
     """
-    clustering = DBSCAN(min_samples=minpts, eps=epsilon, metric=distance_heom). \
+    clustering = DBSCAN(min_samples=minpts, eps=epsilon, metric=distance_heom_dbscan). \
         fit_predict(current_numpy_dataset)
+
     my_clustering = dict()
     for idx, value2 in enumerate(clustering):
         if not value2 in my_clustering.keys():

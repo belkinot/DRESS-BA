@@ -38,7 +38,7 @@ def normalize_features_numpy(dataset):
     #normalized_dataset = dataset
     normalized_dataset = np.array(dataset, dtype=float)
     max_value = dataset.max(0) #Krasse Numpy-Array Magic
-    print(max_value, "max value")
+    # print(max_value, "max value")
     for count, value in enumerate(dataset):
         for count2, _ in enumerate(value):
             # erneut sicherstellen, dass es Zahlenwerte sind
@@ -47,6 +47,36 @@ def normalize_features_numpy(dataset):
     return normalized_dataset
 
 #Distanzfuntkionen
+def distance_heom_dbscan(erster, zweiter):
+    distance = 0
+    counter = 0
+    if isinstance(erster, list):
+        for value in erster:
+            if isinstance(value, str) or isinstance(zweiter[counter], str) and value != '?' and zweiter[counter] != '?':
+                if value == zweiter[counter]:
+                    distance += 0
+                else:
+                    distance += 1
+            else:
+                if isinstance(value, numbers.Number) and isinstance(zweiter[counter], numbers.Number):
+                    distance += abs(value - zweiter[counter])
+                else:
+                    distance += 1
+            counter += 1
+
+    if isinstance(erster, str):
+        if erster == zweiter and erster != '?' and zweiter != '?':
+            distance += 0
+        else:
+            distance += 1
+    else:
+    # if continuous
+        if isinstance(erster, numbers.Number) and isinstance(zweiter, numbers.Number):
+            distance += abs(erster - zweiter)  # Prüfen ob absolut hier richtig ist
+        else:
+            distance += 1
+    return distance
+
 
 
 def distance_heom(erster, zweiter):
@@ -54,12 +84,19 @@ def distance_heom(erster, zweiter):
     sicherstellen dass x und y gleiche länge haben len(x) == len(y)
     features müssen normalisiert sein [0,1]"""
     distance = 0
-
+    counter = 0
+    if type(erster) != np.ndarray:
+        erster = np.asarray(erster, dtype=float)
+    if type(zweiter) != np.ndarray:
+        zweiter = np.asarray(zweiter, dtype=float)
+    #print(type(erster), "erster type")
+    #zweiter = list(zweiter)
+    #print(erster.size, "Datentyp vom ersten Value")
     # numpy_64 float
     # if nominal - true and false
     # if len(erster) == len(zweiter):
-    if isinstance(erster, str):
-        if erster == zweiter and erster != '?':
+    """if isinstance(erster, str):
+        if erster == zweiter and erster != '?' and zweiter != '?':
             distance += 0
         else:
             distance += 1
@@ -70,21 +107,34 @@ def distance_heom(erster, zweiter):
         else:
             distance += 1
 
-    """for counter, value in enumerate(erster):
-        # if nominal - true und false
-        if isinstance(erster[counter], str):
-            # distance += int(erster[counter] != zweiter[counter])
-            if erster[counter] == zweiter[counter]:
+    """
+
+    if erster.size < 2:
+        if isinstance(erster, str):
+            if erster == zweiter:
                 distance += 0
             else:
                 distance += 1
-        # if continuous
+        if isinstance(erster, numbers.Number) and isinstance(zweiter, numbers.Number):
+            distance += erster - zweiter
         else:
-            if isinstance(erster[counter], numbers.Number) \
-                    and isinstance(zweiter[counter], numbers.Number):
-                distance += erster[counter] - zweiter[counter]
-            else:
-                distance += 1 """
+            distance += 1
+    else:
+        for idx, _ in enumerate(erster):
+            # if nominal - true und false
+                if isinstance(erster[idx], str):
+                # distance += int(erster[counter] != zweiter[counter])
+                    if erster[idx] == zweiter[idx]:
+                        distance += 0
+                    else:
+                        distance += 1
+            # if continuous
+                else:
+                    if isinstance(erster[idx], numbers.Number) and isinstance(zweiter[idx], numbers.Number):
+                        distance += erster[idx] - zweiter[idx]
+                    else:
+                        distance += 1
+        print(distance, 'distanz heom')
     return distance
 
 
@@ -95,7 +145,8 @@ def k_nearest_neighbour_list(dataset, parameter_k):
     # neighbours_distances = list()
     for value in dataset:
         #if isinstance(value, numbers.Number): eigentlich kann ich doch nur continous werte clustern oder?
-        mydist = [[euclidean_distance(value, value2), count2] for count2, value2 in enumerate(dataset)]
+        # mydist = [[euclidean_distance(value, value2), count2] for count2, value2 in enumerate(dataset)]
+        mydist = [[distance_heom(value, value2), count2] for count2, value2 in enumerate(dataset)]
         mydist.sort()
         neighbours.append(mydist[parameter_k])
     # ab hier Erweiterung um k-Dist-Graph erstellung zu ermöglichen
@@ -122,7 +173,9 @@ def draw_k_dist_line(list_of_elements):
         point_one = np.array([my_idx, value])
         y_coordinate = steigung * value + point_b
         point_two = np.array([my_idx, y_coordinate])
-        knee_point.append((euclidean_distance(point_one, point_two), idx))
+        #knee_point.append((euclidean_distance(point_one, point_two), idx))
+        knee_point.append((distance_heom(point_one, point_two), idx))
+
 
     knee_point.sort()
     epsilon = list_of_elements[knee_point[2][1]][0]

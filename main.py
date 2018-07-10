@@ -1,44 +1,45 @@
 """Main-Klasse"""
 
 import time
-# import numbers
-# import numpy as np
+import numbers
+import numpy as np
 from sklearn.datasets import load_iris# , load_wine
-# from sklearn import preprocessing
-from Base.helper_functions import normalize_features# , normalize_features_numpy, format_dataset
-from dress_implementation import subspace_processing_dress
-
+from sklearn import preprocessing
+from Base.helper_functions import normalize_features, normalize_features_numpy, format_dataset, distance_heom
+from dress_implementation import subspace_processing_dress, create_m_dimensional_dataset
+from new_dress_implementation import subspace_processing
 
 
 
 if __name__ == '__main__':
 
     START_TIME = time.time()
+    ML_CONSTRAINT = [(1, 2), (140, 141), (30, 31)]
+    NL_CONSTRAINT = [(1, 140), (2, 83)]
 
     IRIS_DATASET = load_iris()
 
     X = IRIS_DATASET.data
     Y = IRIS_DATASET.target
 
+
     print("Anzahl der Datensätze", len(X))
     print("Anzah der Dimensionen", len(X[0]))
 
     # print(X[0], "X an stelle 0")
 
-    NORMALIZED_X_SELF = normalize_features(X)
+    #NORMALIZED_X_SELF = normalize_features(X)
     #normalized_X = preprocessing.normalize(X, 'max', 0)
-    #normalized_X_self_numpy = normalize_features_numpy(X)
+    normalized_X_self_numpy = normalize_features_numpy(X)
 
-    # for i in range(len(normalized_X)):
-    #    print(normalized_X_self_numpy[i] - normalized_X[i])
 
-    ML_CONSTRAINT = [(1, 2), (140, 141), (30, 31)]
-    NL_CONSTRAINT = [(1, 140), (2, 83)]
-
+    #for i in range(len(normalized_X)):
+     #   print(NORMALIZED_X_SELF[i] - normalized_X[i])
     #print()
-    subspace_processing_dress(NORMALIZED_X_SELF, ML_CONSTRAINT, NL_CONSTRAINT)
+    #subspace_processing(normalized_X_self_numpy, ML_CONSTRAINT, NL_CONSTRAINT)
+    #subspace_processing_dress(normalized_X_self_numpy, ML_CONSTRAINT, NL_CONSTRAINT)
 
-    """ 
+
     f = "ship.csv"
     #data = np.array(np.empty(), )
     data = []
@@ -72,6 +73,6 @@ if __name__ == '__main__':
     normalized_X = normalize_features(data)
 
     print(normalized_X[0])
-    subspace_processing_dress(normalized_X, ml_constraint, nl_constraint)
-    """
+    #subspace_processing_dress(normalized_X, ML_CONSTRAINT, NL_CONSTRAINT)
+    subspace_processing(normalized_X, ML_CONSTRAINT, NL_CONSTRAINT)
     print("My Programm took", time.time()-START_TIME, "to run")
