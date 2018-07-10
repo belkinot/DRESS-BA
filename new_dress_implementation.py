@@ -21,9 +21,13 @@ def subspace_processing(normalized_dataset, ml_constraints, nl_constraints):
     print('next candidates', next_candidates)
     # zweidimensionaler start - iterativ nun
     while True:
+        subspace_best_previous = subspace_best
         result = create_m_dimensional_results(next_candidates, ml_constraints, nl_constraints, normalized_dataset, quality_best, subspace_best)
         quality_best = result[0]
         subspace_best = result[1]
+        if subspace_best == subspace_best_previous:
+            print('Abbruchsergebnis', result, 'Beste Qualität', quality_best, subspace_best)
+            break
         for i in subspace_best:
             if i in candidate_all:
                 candidate_all.remove(i)
@@ -45,7 +49,7 @@ def create_m_dimensional_results(candidate_all, ml_constraints, nl_constraints, 
         dimensional_dataset = create_m_dimensional_datasets(normalized_dataset, i)
         minpts = round(math.log1p(len(normalized_dataset)))
         epsilon = 0.01  # crazy kneepoint methode
-        current_numpy_dataset = np.array(dimensional_dataset, float)
+        current_numpy_dataset = np.array(dimensional_dataset, object)
         current_numpy_dataset = current_numpy_dataset.reshape(-1, 1)
         my_cluster_result = create_clustering_dict(current_numpy_dataset, epsilon, minpts)
         print(my_cluster_result)
@@ -66,7 +70,7 @@ def create_1_dimensional_results(candidate_all, ml_constraints, nl_constraints, 
         dimensional_dataset = create_1_dimensional_datasets(normalized_dataset, i)
         minpts = round(math.log1p(len(normalized_dataset)))
         epsilon = 0.01  # crazy kneepoint methode
-        current_numpy_dataset = np.array(dimensional_dataset, float)
+        current_numpy_dataset = np.array(dimensional_dataset, object)
         current_numpy_dataset = current_numpy_dataset.reshape(-1, 1)
         my_cluster_result = create_clustering_dict(current_numpy_dataset, epsilon, minpts)
         #print(my_cluster_result)
@@ -82,13 +86,6 @@ def create_1_dimensional_results(candidate_all, ml_constraints, nl_constraints, 
 
 
 def create_clustering_dict(current_numpy_dataset, epsilon, minpts):
-    """
-
-    :param current_numpy_dataset:
-    :param epsilon:
-    :param minpts:
-    :return:
-    """
     clustering = DBSCAN(min_samples=minpts, eps=epsilon, metric=distance_heom_metric). \
         fit_predict(current_numpy_dataset)
 

@@ -204,6 +204,18 @@ def format_dataset(data):
                 #    value[idx] = float('inf')
                 # else:
                 value[idx] = value2.strip('\'')
+                #if value[idx] == '?':
+                 #   value[idx] = None
+                if value[idx] == 'J':
+                    value[idx] = 1
+                if value[idx] == 'N':
+                    value[idx] = 0
+                if isinstance(value[idx], str):
+                    #print('string konvertieren und stunden')
+                    if ':' in value[idx]:
+                        temp = value[idx].split(':')
+                        temp = int(temp[0])*60*60 + int(temp[1]) * 60 + int(temp[2])
+                        value[idx] = temp
     print(zahlenwerte, 'Digits', keine_zahlenwerte, 'keine digits')
 
 #TODO: Evaluierungsmetriken Sensitivity, specificity, accuracy, AUC, F-Measure"""

@@ -22,7 +22,10 @@ def distance_heom_metric(point_one, point_two):
 def create_1_dimensional_datasets(dataset, dimension):
     current_dataset = list()
     for value in dataset:
-        current_dataset.append(value[dimension])
+        if value[dimension] == '?':
+            current_dataset.append(None)
+        else:
+            current_dataset.append(value[dimension])
     #print(current_dataset)
     return current_dataset
 
@@ -32,7 +35,10 @@ def create_m_dimensional_datasets(dataset, dimensions):
     for value in dataset:
         help_dataset = list()
         for i in dimensions:
-            help_dataset.append(value[i])
+            if value[i] == '?':
+                help_dataset.append(None)
+            else:
+                help_dataset.append(value[i])
         current_dataset.append(help_dataset)
     return current_dataset
 
