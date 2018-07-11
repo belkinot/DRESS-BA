@@ -49,7 +49,8 @@ if __name__ == '__main__':
             temp = line.split(",")
             temp1 = temp[3:4]
             #temp2 = temp[145:148]
-            temp2 = temp[145:201]
+            temp2 = temp[145:175]
+            #temp2 = temp[145:201]
             #temp3 = temp[395:400]
             templist = temp1+temp2#+temp3
             data.append(templist)
@@ -76,4 +77,5 @@ if __name__ == '__main__':
 
     #subspace_processing_dress(normalized_X, ML_CONSTRAINT, NL_CONSTRAINT)
     subspace_processing(normalized_X, ML_CONSTRAINT, NL_CONSTRAINT)
+
     print("My Programm took", time.time()-START_TIME, "to run")
