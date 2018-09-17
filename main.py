@@ -2,11 +2,10 @@
 
 import time
 import numbers
-import numpy as np
 from sklearn.datasets import load_iris# , load_wine
-from sklearn import preprocessing
+#from sklearn import preprocessing
 from Base.helper_functions import normalize_features, normalize_features_numpy, format_dataset, distance_heom
-from dress_implementation import subspace_processing_dress, create_m_dimensional_dataset
+#from dress_implementation import subspace_processing_dress, create_m_dimensional_dataset
 from new_dress_implementation import subspace_processing
 
 
@@ -14,14 +13,13 @@ from new_dress_implementation import subspace_processing
 if __name__ == '__main__':
 
     START_TIME = time.time()
-    ML_CONSTRAINT = [(1, 2), (140, 141), (30, 31)]
-    NL_CONSTRAINT = [(1, 140), (2, 83)]
+    ML_CONSTRAINT = [(1, 2), (140, 141), (30, 31), (1000,2583)]
+    NL_CONSTRAINT = [(1, 140), (2, 83), (1001,2584), (50,250)]
 
     IRIS_DATASET = load_iris()
 
     X = IRIS_DATASET.data
     Y = IRIS_DATASET.target
-
 
     print("Anzahl der Datensätze", len(X))
     print("Anzah der Dimensionen", len(X[0]))
@@ -30,7 +28,7 @@ if __name__ == '__main__':
 
     #NORMALIZED_X_SELF = normalize_features(X)
     #normalized_X = preprocessing.normalize(X, 'max', 0)
-    normalized_X_self_numpy = normalize_features_numpy(X)
+    normalized_x_self_numpy = normalize_features_numpy(X)
 
 
     #for i in range(len(normalized_X)):
@@ -48,11 +46,10 @@ if __name__ == '__main__':
             #temp = eval(line)
             temp = line.split(",")
             temp1 = temp[3:4]
-            #temp2 = temp[145:148]
-            temp2 = temp[145:175]
-            #temp2 = temp[145:201]
-            #temp3 = temp[395:400]
-            templist = temp1+temp2#+temp3
+            #temp2 = temp[145:185]
+            temp2 = temp[145:201]
+            temp3 = temp[395:400]
+            templist = temp1+temp2+temp3
             data.append(templist)
 
 
